@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './components.css';
+import { RESUME_DATA } from './resumeData';
+import { downloadResumePDF, downloadResumeDoc } from './resumeGenerator';
 
 // ── Asset imports ───────────────────────────────────────────
 import heroStadium from './assets/images/hero_stadium.jpg';
@@ -75,6 +77,114 @@ const IconExternal = () => (
   </svg>
 );
 
+const IconFilePdf = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="9" y1="15" x2="15" y2="15"/>
+  </svg>
+);
+
+const IconFileWord = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+    <polyline points="7 8 10 16 12 11 14 16 17 8"/>
+  </svg>
+);
+
+const IconChevronDown = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9"/>
+  </svg>
+);
+
+// ── Live Dynamic CV Dropdown Component ────────────────────────
+function CVDropdown({
+  className = 'btn btn-outline-red',
+  alignRight = false,
+  label = 'Download CV'
+}: {
+  className?: string;
+  alignRight?: boolean;
+  label?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
+
+  return (
+    <div className="cv-dropdown-wrapper" ref={dropdownRef}>
+      <button
+        type="button"
+        className={`${className} cv-trigger-btn`}
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-haspopup="true"
+      >
+        <IconDownload />
+        <span>{label}</span>
+        <IconChevronDown />
+      </button>
+
+      {open && (
+        <div className={`cv-menu ${alignRight ? 'menu-right' : ''}`} role="menu">
+          <div className="cv-menu-header">
+            <div className="cv-menu-title">Live Dynamic Resume</div>
+            <div className="cv-menu-sub">Auto-synced with portfolio edits</div>
+          </div>
+
+          <button
+            type="button"
+            className="cv-menu-item"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              downloadResumePDF();
+            }}
+          >
+            <div className="cv-item-icon">
+              <IconFilePdf />
+            </div>
+            <div className="cv-item-info">
+              <span className="cv-item-label">Print / Save as PDF</span>
+              <span className="cv-item-desc">A4 formatted clean ATS layout</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            className="cv-menu-item"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              downloadResumeDoc();
+            }}
+          >
+            <div className="cv-item-icon">
+              <IconFileWord />
+            </div>
+            <div className="cv-item-info">
+              <span className="cv-item-label">Microsoft Word (.DOC)</span>
+              <span className="cv-item-desc">Fully editable Word document</span>
+            </div>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Intersection Observer Hook ──────────────────────────────
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -143,9 +253,7 @@ function Navbar() {
                 {link}
               </button>
             ))}
-            <button className="nav-cv-btn" onClick={handleCV} aria-label="Download CV">
-              <IconDownload /> Download CV
-            </button>
+            <CVDropdown className="nav-cv-btn" alignRight={true} />
           </div>
 
           <button className={`nav-hamburger ${menuOpen ? 'open' : ''}`}
@@ -162,9 +270,9 @@ function Navbar() {
           <button key={link} className={`mobile-nav-link ${active === link ? 'active' : ''}`}
             onClick={() => scrollTo(link)}>{link}</button>
         ))}
-        <button className="mobile-cv-btn" onClick={handleCV}>
-          <IconDownload /> Download CV
-        </button>
+        <div style={{ marginTop: '12px' }}>
+          <CVDropdown className="mobile-cv-btn" alignRight={false} />
+        </div>
       </div>
     </>
   );
@@ -204,9 +312,7 @@ function Hero() {
             <button className="btn btn-ghost" onClick={() => scrollTo('contact')} id="hero-contact-btn">
               Contact Me
             </button>
-            <a className="btn btn-outline-red" href="./resume.pdf" target="_blank" rel="noopener noreferrer" id="hero-cv-btn">
-              <IconDownload /> Download CV
-            </a>
+            <CVDropdown className="btn btn-outline-red" alignRight={false} label="Download CV" />
           </div>
 
           <div className="hero-socials" aria-label="Social links">
@@ -227,7 +333,7 @@ function Hero() {
           <div className="hero-stats" aria-label="Professional highlights">
             <div>
               <div className="hero-stat-value">01<span></span></div>
-              <div className="hero-stat-label">Sports Analyst (Spideo)</div>
+              <div className="hero-stat-label">Sports Analyst (Spiideo)</div>
             </div>
             <div>
               <div className="hero-stat-value">6<span>+</span></div>
@@ -277,7 +383,7 @@ function About() {
 
               <p>
                 I am an <strong>MBA in Business Administration (Business Analytics)</strong> candidate at Sandip University, Nashik,
-                and a <strong>Sports Analyst at Spideo</strong>. My day-to-day focus centers on sports match tagging,
+                and a <strong>Sports Analyst at Spiideo</strong>. My day-to-day focus centers on sports match tagging,
                 roster workflows, and maintaining rigorous data quality for professional sports analytics.
               </p>
               <p>
@@ -416,7 +522,7 @@ function Experience() {
               <div className="exp-card-header">
                 <div className="exp-company-logo">S</div>
                 <div className="exp-title-wrap">
-                  <div className="exp-company">Spideo (MNC)</div>
+                  <div className="exp-company">Spiideo</div>
                   <div className="exp-role">Sports Analyst</div>
                 </div>
               </div>
@@ -751,9 +857,7 @@ function CTABanner() {
           <button className="btn btn-primary" onClick={() => document.getElementById('contact')?.scrollIntoView({behavior:'smooth'})} id="cta-contact-btn">
             Contact Me <IconArrow/>
           </button>
-          <a className="btn btn-ghost" href="./resume.pdf" target="_blank" rel="noopener noreferrer" id="cta-cv-btn">
-            <IconDownload/> Download CV
-          </a>
+          <CVDropdown className="btn btn-ghost" alignRight={false} label="Download CV" />
         </div>
       </div>
     </div>
