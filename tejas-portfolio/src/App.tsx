@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './components.css';
 import { RESUME_DATA } from './resumeData';
-import { downloadResumePDF, downloadResumeDoc } from './resumeGenerator';
+import { downloadResumePDF, downloadResumeDocx } from './resumeGenerator';
 
 // ── Asset imports ───────────────────────────────────────────
 import heroStadium from './assets/images/hero_stadium.jpg';
@@ -53,6 +53,32 @@ const IconLocation = () => (
   </svg>
 );
 
+const IconSun = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="5"/>
+    <line x1="12" y1="1" x2="12" y2="3"/>
+    <line x1="12" y1="21" x2="12" y2="23"/>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+    <line x1="1" y1="12" x2="3" y2="12"/>
+    <line x1="21" y1="12" x2="23" y2="12"/>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+  </svg>
+);
+
+const IconMoon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+  </svg>
+);
+
+const IconChevronUp = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+);
+
 const IconCalendar = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -98,6 +124,185 @@ const IconChevronDown = () => (
   </svg>
 );
 
+const IconEye = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </svg>
+);
+
+const IconCopy = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+  </svg>
+);
+
+const IconCheck = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+);
+
+// ── Interactive Résumé Preview Modal ─────────────────────────
+function ResumeModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+      modalRef.current?.focus();
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  const { personal, experience, education, skillGroups, projects, certifications } = RESUME_DATA;
+
+  return (
+    <div
+      className="resume-modal-backdrop"
+      onClick={e => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="resume-modal-heading"
+    >
+      <div className="resume-modal-dialog" ref={modalRef} tabIndex={-1}>
+        <div className="resume-modal-header">
+          <div className="resume-modal-title" id="resume-modal-heading">
+            <span>📄</span> Résumé Preview &amp; Single Source of Truth
+          </div>
+          <div className="resume-modal-actions">
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{ padding: '8px 14px', fontSize: '12px' }}
+              onClick={downloadResumePDF}
+            >
+              <IconFilePdf /> Save PDF
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              style={{ padding: '8px 14px', fontSize: '12px' }}
+              onClick={downloadResumeDocx}
+            >
+              <IconFileWord /> Download Word (.docx)
+            </button>
+            <button
+              type="button"
+              className="resume-close-btn"
+              onClick={onClose}
+              aria-label="Close résumé preview"
+              title="Close (Esc)"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div className="resume-modal-body">
+          <div className="resume-sheet">
+            <div className="resume-sheet-header">
+              <h1 className="resume-sheet-name">{personal.name}</h1>
+              <div className="resume-sheet-role">{personal.title}</div>
+              <div className="resume-sheet-contact">
+                {personal.location} &bull; Phone: {personal.phone} &bull; Email: {personal.email}<br/>
+                LinkedIn: {personal.linkedinDisplay} &bull; GitHub: {personal.githubDisplay}
+              </div>
+            </div>
+
+            <div className="resume-sheet-sec-title">Professional Summary</div>
+            <p className="resume-sheet-p">{personal.summary}</p>
+
+            <div className="resume-sheet-sec-title">Work Experience</div>
+            {experience.map(exp => (
+              <div key={exp.company} className="resume-sheet-item">
+                <div className="resume-sheet-item-header">
+                  <div>
+                    <span className="resume-sheet-item-role">{exp.role}</span>
+                    <span className="resume-sheet-item-company"> — {exp.company}</span>
+                  </div>
+                  <span className="resume-sheet-item-meta">{exp.location} | {exp.period}</span>
+                </div>
+                <ul className="resume-sheet-ul">
+                  {exp.duties.map((duty, idx) => (
+                    <li key={idx}>{duty}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+
+            <div className="resume-sheet-sec-title">Education</div>
+            {education.map(edu => (
+              <div key={edu.degree} className="resume-sheet-item">
+                <div className="resume-sheet-item-header">
+                  <div>
+                    <span className="resume-sheet-item-role">{edu.degree}</span>
+                    <span> — {edu.institution}</span>
+                  </div>
+                  <span className="resume-sheet-item-meta">{edu.location} | {edu.year}</span>
+                </div>
+                <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>
+                  {edu.specialization} {edu.score ? `• ${edu.score}` : ''}
+                </div>
+              </div>
+            ))}
+
+            <div className="resume-sheet-sec-title">Technical Toolkit &amp; Competencies</div>
+            <table className="resume-sheet-table">
+              <tbody>
+                {skillGroups.map(grp => (
+                  <tr key={grp.title}>
+                    <td className="resume-sheet-table-cat">{grp.title}:</td>
+                    <td style={{ color: '#4b5563' }}>{grp.skills.map(s => s.name).join(', ')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className="resume-sheet-sec-title">Selected Analytics &amp; Data Engineering Projects</div>
+            {projects.slice(0, 3).map(proj => (
+              <div key={proj.id} className="resume-sheet-item">
+                <div className="resume-sheet-item-header">
+                  <span className="resume-sheet-item-role">{proj.title}</span>
+                  <span style={{ fontSize: '11px', color: '#b91c1c', fontWeight: 600 }}>[{proj.category}]</span>
+                </div>
+                <p className="resume-sheet-p" style={{ fontSize: '11.5px', marginTop: '2px' }}>{proj.description}</p>
+                <div style={{ fontSize: '10.5px', color: '#6b7280', marginTop: '2px' }}>
+                  Technologies: {proj.tech.join(' • ')}
+                </div>
+              </div>
+            ))}
+
+            <div className="resume-sheet-sec-title">Verified Certifications</div>
+            <ul className="resume-sheet-ul">
+              {certifications.map(cert => (
+                <li key={cert.title}>
+                  <strong>{cert.title}</strong> — {cert.issuer}
+                  {cert.credentialId && <span style={{ color: '#6b7280' }}> (Credential ID: {cert.credentialId})</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Live Dynamic CV Dropdown Component ────────────────────────
 function CVDropdown({
   className = 'btn btn-outline-red',
@@ -109,6 +314,7 @@ function CVDropdown({
   label?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -124,64 +330,86 @@ function CVDropdown({
   }, [open]);
 
   return (
-    <div className="cv-dropdown-wrapper" ref={dropdownRef}>
-      <button
-        type="button"
-        className={`${className} cv-trigger-btn`}
-        onClick={() => setOpen(!open)}
-        aria-expanded={open}
-        aria-haspopup="true"
-      >
-        <IconDownload />
-        <span>{label}</span>
-        <IconChevronDown />
-      </button>
+    <>
+      <div className="cv-dropdown-wrapper" ref={dropdownRef}>
+        <button
+          type="button"
+          className={`${className} cv-trigger-btn`}
+          onClick={() => setOpen(!open)}
+          aria-expanded={open}
+          aria-haspopup="true"
+        >
+          <IconDownload />
+          <span>{label}</span>
+          <IconChevronDown />
+        </button>
 
-      {open && (
-        <div className={`cv-menu ${alignRight ? 'menu-right' : ''}`} role="menu">
-          <div className="cv-menu-header">
-            <div className="cv-menu-title">Live Dynamic Resume</div>
-            <div className="cv-menu-sub">Auto-synced with portfolio edits</div>
+        {open && (
+          <div className={`cv-menu ${alignRight ? 'menu-right' : ''}`} role="menu">
+            <div className="cv-menu-header">
+              <div className="cv-menu-title">Live Dynamic Resume</div>
+              <div className="cv-menu-sub">Auto-synced with portfolio edits</div>
+            </div>
+
+            <button
+              type="button"
+              className="cv-menu-item"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                setPreviewOpen(true);
+              }}
+            >
+              <div className="cv-item-icon">
+                <IconEye />
+              </div>
+              <div className="cv-item-info">
+                <span className="cv-item-label">Preview Résumé</span>
+                <span className="cv-item-desc">In-browser ATS document view</span>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              className="cv-menu-item"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                downloadResumePDF();
+              }}
+            >
+              <div className="cv-item-icon">
+                <IconFilePdf />
+              </div>
+              <div className="cv-item-info">
+                <span className="cv-item-label">Print / Save as PDF</span>
+                <span className="cv-item-desc">A4 clean ATS-compliant PDF</span>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              className="cv-menu-item"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                downloadResumeDocx();
+              }}
+            >
+              <div className="cv-item-icon">
+                <IconFileWord />
+              </div>
+              <div className="cv-item-info">
+                <span className="cv-item-label">Microsoft Word (.DOCX)</span>
+                <span className="cv-item-desc">Native editable Word document</span>
+              </div>
+            </button>
           </div>
+        )}
+      </div>
 
-          <button
-            type="button"
-            className="cv-menu-item"
-            role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              downloadResumePDF();
-            }}
-          >
-            <div className="cv-item-icon">
-              <IconFilePdf />
-            </div>
-            <div className="cv-item-info">
-              <span className="cv-item-label">Print / Save as PDF</span>
-              <span className="cv-item-desc">A4 formatted clean ATS layout</span>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            className="cv-menu-item"
-            role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              downloadResumeDoc();
-            }}
-          >
-            <div className="cv-item-icon">
-              <IconFileWord />
-            </div>
-            <div className="cv-item-info">
-              <span className="cv-item-label">Microsoft Word (.DOC)</span>
-              <span className="cv-item-desc">Fully editable Word document</span>
-            </div>
-          </button>
-        </div>
-      )}
-    </div>
+      <ResumeModal isOpen={previewOpen} onClose={() => setPreviewOpen(false)} />
+    </>
   );
 }
 
@@ -204,7 +432,7 @@ function useReveal() {
 // ── Navbar ──────────────────────────────────────────────────
 const NAV_LINKS = ['Home', 'About', 'Skills', 'Experience', 'Projects', 'Education', 'Contact'];
 
-function Navbar() {
+function Navbar({ theme, onToggleTheme }: { theme: 'dark' | 'light'; onToggleTheme: () => void }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [active, setActive] = useState('Home');
@@ -221,7 +449,7 @@ function Navbar() {
       entries => {
         entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id.charAt(0).toUpperCase() + e.target.id.slice(1)); });
       },
-      { threshold: 0.4 }
+      { threshold: 0.35 }
     );
     sections.forEach(s => s && obs.observe(s));
     return () => obs.disconnect();
@@ -232,15 +460,11 @@ function Navbar() {
     setMenuOpen(false);
   }, []);
 
-  const handleCV = () => {
-    window.open('./resume.pdf', '_blank');
-  };
-
   return (
     <>
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} role="navigation" aria-label="Main navigation">
         <div className="navbar-inner">
-          <a className="navbar-logo" onClick={() => scrollTo('home')} href="#home" aria-label="Tejas Patil home">
+          <a className="navbar-logo" onClick={() => scrollTo('home')} href="#home" aria-label="Tejas Patil Home">
             <div className="logo-mark">TP</div>
             <span className="logo-name">Tejas Patil</span>
           </a>
@@ -253,15 +477,35 @@ function Navbar() {
                 {link}
               </button>
             ))}
+            <button
+              type="button"
+              className="theme-toggle-btn"
+              onClick={onToggleTheme}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? <IconSun /> : <IconMoon />}
+            </button>
             <CVDropdown className="nav-cv-btn" alignRight={true} />
           </div>
 
-          <button className={`nav-hamburger ${menuOpen ? 'open' : ''}`}
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={menuOpen}>
-            <span/><span/><span/>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              className="theme-toggle-btn mobile-theme-toggle"
+              style={{ display: 'none' }}
+              onClick={onToggleTheme}
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <IconSun /> : <IconMoon />}
+            </button>
+            <button className={`nav-hamburger ${menuOpen ? 'open' : ''}`}
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}>
+              <span/><span/><span/>
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -270,8 +514,19 @@ function Navbar() {
           <button key={link} className={`mobile-nav-link ${active === link ? 'active' : ''}`}
             onClick={() => scrollTo(link)}>{link}</button>
         ))}
-        <div style={{ marginTop: '12px' }}>
-          <CVDropdown className="mobile-cv-btn" alignRight={false} />
+        <div style={{ display: 'flex', gap: '8px', marginTop: '14px', alignItems: 'center' }}>
+          <button
+            type="button"
+            className="theme-toggle-btn"
+            onClick={onToggleTheme}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            style={{ width: '44px', height: '44px' }}
+          >
+            {theme === 'dark' ? <IconSun /> : <IconMoon />}
+          </button>
+          <div style={{ flex: 1 }}>
+            <CVDropdown className="mobile-cv-btn" alignRight={false} />
+          </div>
         </div>
       </div>
     </>
@@ -292,7 +547,7 @@ function Hero() {
       <div className="hero-content" style={{ width: '100%' }}>
         <div className="hero-inner">
           <div className="hero-label">
-            <span/> Sports Data Analyst | Business Analytics Professional
+            <span/> Sports Analyst @ Spiideo | MBA Business Analytics
           </div>
 
           <p className="hero-greeting">Hi, I'm</p>
@@ -301,13 +556,14 @@ function Hero() {
           </h1>
 
           <p className="hero-description">
-            I turn sports and business data into actionable insights through match tagging,
-            roster workflows, statistical modeling, and high-impact visual dashboards.
+            I work as a Sports Analyst at Spiideo, focusing on live sports match tagging,
+            roster pipelines, and data quality. Backed by my BCA in Data Analytics and current MBA studies,
+            I build clear dashboards and data models in Python, SQL, Power BI, and Tableau.
           </p>
 
           <div className="hero-actions">
-            <button className="btn btn-primary" onClick={() => scrollTo('projects')} id="hero-explore-btn">
-              Explore My Work <IconArrow />
+            <button className="btn btn-primary" onClick={() => scrollTo('lab')} id="hero-explore-btn">
+              Explore Match Lab <IconArrow />
             </button>
             <button className="btn btn-ghost" onClick={() => scrollTo('contact')} id="hero-contact-btn">
               Contact Me
@@ -332,16 +588,16 @@ function Hero() {
 
           <div className="hero-stats" aria-label="Professional highlights">
             <div>
-              <div className="hero-stat-value">01<span></span></div>
-              <div className="hero-stat-label">Sports Analyst (Spiideo)</div>
+              <div className="hero-stat-value">Spiideo</div>
+              <div className="hero-stat-label">Sports Analyst (Current)</div>
             </div>
             <div>
               <div className="hero-stat-value">6<span>+</span></div>
-              <div className="hero-stat-label">Analytics Projects</div>
+              <div className="hero-stat-label">Data Projects</div>
             </div>
             <div>
               <div className="hero-stat-value">100<span>%</span></div>
-              <div className="hero-stat-label">Data Quality &amp; Precision</div>
+              <div className="hero-stat-label">Verified Match Tagging</div>
             </div>
           </div>
         </div>
@@ -364,40 +620,59 @@ function About() {
         <div className="reveal" ref={ref}>
           <div className="about-grid">
             <div className="about-image-wrap">
-              <div className="about-image-placeholder" aria-label="Sports analytics badge">
-                <svg viewBox="0 0 64 64" fill="currentColor">
-                  <path d="M32 32c7.7 0 14-6.3 14-14S39.7 4 32 4 18 10.3 18 18s6.3 14 14 14zm0 7c-9.3 0-28 4.7-28 14v7h56v-7c0-9.3-18.7-14-28-14z"/>
-                </svg>
-                <span className="about-image-label">Tejas Sanjay Patil</span>
-              </div>
-              <div className="about-accent-badge">
-                Sports<br/>Analytics<br/><span style={{color:'rgba(255,255,255,0.7)',fontSize:'11px'}}>Passion · Data · Results</span>
+              <div className="about-image-placeholder" aria-label="Professional summary card">
+                <span className="about-card-badge">Analytics Profile</span>
+                <div className="about-card-title">
+                  Tejas Sanjay Patil
+                </div>
+                <p style={{ fontSize: '13.5px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                  Sports Analyst based in Nashik, bridging on-pitch tactical events with rigorous business intelligence and statistical reporting.
+                </p>
+
+                <div className="about-card-metrics">
+                  <div className="about-card-metric-row">
+                    <span className="about-card-metric-label">Current Role:</span>
+                    <span className="about-card-metric-val">Sports Analyst</span>
+                  </div>
+                  <div className="about-card-metric-row">
+                    <span className="about-card-metric-label">Company:</span>
+                    <span className="about-card-metric-val" style={{ color: 'var(--accent)' }}>Spiideo</span>
+                  </div>
+                  <div className="about-card-metric-row">
+                    <span className="about-card-metric-label">Education:</span>
+                    <span className="about-card-metric-val">MBA (Pursuing) · BCA</span>
+                  </div>
+                  <div className="about-card-metric-row">
+                    <span className="about-card-metric-label">Key Stack:</span>
+                    <span className="about-card-metric-val">Python, SQL, Power BI</span>
+                  </div>
+                </div>
+
+                <div className="about-card-tagline">
+                  "Turning rapid match sequences into clean, decision-ready data."
+                </div>
               </div>
             </div>
 
             <div className="about-text">
               <div>
                 <div className="section-tag">About Me</div>
-                <h2 className="section-title">A mix of analytics,<br/>sports &amp; problem solving.</h2>
+                <h2 className="section-title">Where athletic passion<br/>meets practical analytics.</h2>
               </div>
 
               <p>
-                I am an <strong>MBA in Business Administration (Business Analytics)</strong> candidate at Sandip University, Nashik,
-                and a <strong>Sports Analyst at Spiideo</strong>. My day-to-day focus centers on sports match tagging,
-                roster workflows, and maintaining rigorous data quality for professional sports analytics.
+                I am a <strong>Sports Analyst at Spiideo</strong> and an <strong>MBA in Business Analytics candidate</strong> at Sandip University, Nashik. My day-to-day focus centers on high-precision sports match tagging, roster workflows, and maintaining rigorous data quality for competitive athletic analysis.
               </p>
               <p>
-                Holding a <strong>Bachelor of Computer Applications in Data Analytics</strong> (CGPA 7.01), I connect statistical modeling
-                with practical business intelligence using <strong>Python, MySQL, Power BI, Tableau, and Excel</strong>.
-                I transform dense match logs and enterprise datasets into clean, actionable insights that empower strategic decisions.
+                Having graduated with a <strong>Bachelor of Computer Applications in Data Analytics</strong> (CGPA 7.01), I combine structured sports domain understanding with programming in <strong>Python, MySQL, Power BI, Tableau, and Excel</strong>. I enjoy untangling complex match logs, exploring passing sequences, and building dashboards that help teams make informed decisions.
               </p>
 
               <div className="about-attrs">
                 {[
-                  { icon: '⚽', label: 'Sports Tagging', sub: 'Match & roster workflows' },
-                  { icon: '🎯', label: 'Data Quality Control', sub: 'Accuracy & pipeline integrity' },
-                  { icon: '📊', label: 'BI & Dashboards', sub: 'Power BI & Tableau storytelling' },
-                  { icon: '🤖', label: 'Machine Learning', sub: 'Predictive modeling in Python' },
+                  { icon: '⚽', label: 'Match Tagging', sub: 'High-precision event logging at Spiideo' },
+                  { icon: '🎯', label: 'Data Quality & Roster', sub: 'Pipeline validation & roster synchronization' },
+                  { icon: '📊', label: 'BI & Storytelling', sub: 'Interactive Power BI & Tableau dashboards' },
+                  { icon: '🐍', label: 'Python Analytics', sub: 'Pandas, NumPy, and Scikit-learn modeling' },
                 ].map(attr => (
                   <div key={attr.label} className="about-attr">
                     <span style={{fontSize:'20px'}}>{attr.icon}</span>
@@ -410,8 +685,8 @@ function About() {
               </div>
 
               <div style={{display:'flex',gap:'12px',marginTop:'8px',flexWrap:'wrap'}}>
-                <button className="btn btn-primary" onClick={() => document.getElementById('contact')?.scrollIntoView({behavior:'smooth'})} id="about-contact-btn">
-                  Get In Touch <IconArrow />
+                <button className="btn btn-primary" onClick={() => document.getElementById('lab')?.scrollIntoView({behavior:'smooth'})} id="about-lab-btn">
+                  Test Match Lab <IconArrow />
                 </button>
                 <button className="btn btn-ghost" onClick={() => document.getElementById('projects')?.scrollIntoView({behavior:'smooth'})} id="about-projects-btn">
                   View Projects
@@ -746,6 +1021,223 @@ function Projects() {
   );
 }
 
+// ── Sports Analytics Match Lab ──────────────────────────────
+type MatchEventType = 'passes' | 'tackles' | 'shots' | 'aerials';
+
+interface MatchEvent {
+  id: number;
+  type: MatchEventType;
+  minute: string;
+  player: string;
+  x: number; // 0 to 100 percentage
+  y: number; // 0 to 100 percentage
+  endX?: number;
+  endY?: number;
+  success: boolean;
+  desc: string;
+}
+
+const SAMPLE_MATCH_EVENTS: MatchEvent[] = [
+  // Passes (Green or Red)
+  { id: 1, type: 'passes', minute: "14'", player: 'No. 8 (CM)', x: 35, y: 50, endX: 68, endY: 28, success: true, desc: 'Progressive diagonal ball to LW' },
+  { id: 2, type: 'passes', minute: "22'", player: 'No. 4 (CB)', x: 20, y: 65, endX: 52, endY: 72, success: true, desc: 'Line-breaking pass to RW' },
+  { id: 3, type: 'passes', minute: "37'", player: 'No. 10 (AM)', x: 62, y: 48, endX: 84, endY: 45, success: true, desc: 'Through ball into penalty box' },
+  { id: 4, type: 'passes', minute: "54'", player: 'No. 6 (DM)', x: 42, y: 35, endX: 50, endY: 20, success: false, desc: 'Intercepted lateral turnover' },
+  { id: 5, type: 'passes', minute: "78'", player: 'No. 8 (CM)', x: 55, y: 52, endX: 88, endY: 70, success: true, desc: 'Switch of play to overlapping FB' },
+
+  // Tackles
+  { id: 6, type: 'tackles', minute: "09'", player: 'No. 6 (DM)', x: 40, y: 42, success: true, desc: 'Clean slide tackle in central transition' },
+  { id: 7, type: 'tackles', minute: "28'", player: 'No. 3 (LB)', x: 26, y: 20, success: true, desc: 'Touchline defensive recovery' },
+  { id: 8, type: 'tackles', minute: "61'", player: 'No. 4 (CB)', x: 18, y: 55, success: false, desc: 'Foul committed near box edge' },
+  { id: 9, type: 'tackles', minute: "83'", player: 'No. 2 (RB)', x: 32, y: 82, success: true, desc: 'Interception & tackle on counter' },
+
+  // Shots
+  { id: 10, type: 'shots', minute: "18'", player: 'No. 9 (ST)', x: 86, y: 46, success: true, desc: 'Shot on target - Low bottom right corner (0.34 xG)' },
+  { id: 11, type: 'shots', minute: "41'", player: 'No. 11 (LW)', x: 78, y: 30, success: false, desc: 'Curler from outside box - Blocked (0.08 xG)' },
+  { id: 12, type: 'shots', minute: "72'", player: 'No. 10 (AM)', x: 89, y: 52, success: true, desc: 'Volley on target - Saved by keeper (0.42 xG)' },
+
+  // Aerial Duels
+  { id: 13, type: 'aerials', minute: "31'", player: 'No. 5 (CB)', x: 22, y: 48, success: true, desc: 'Defensive header clearance from corner' },
+  { id: 14, type: 'aerials', minute: "49'", player: 'No. 9 (ST)', x: 50, y: 50, success: false, desc: 'Goal kick contest - duel lost' },
+  { id: 15, type: 'aerials', minute: "88'", player: 'No. 5 (CB)', x: 16, y: 52, success: true, desc: 'Box aerial win under pressure' },
+];
+
+function SportsAnalyticsLab() {
+  const [activeFilter, setActiveFilter] = useState<MatchEventType>('passes');
+  const ref = useReveal();
+
+  const events = SAMPLE_MATCH_EVENTS.filter(e => e.type === activeFilter);
+  const successCount = events.filter(e => e.success).length;
+  const accuracy = Math.round((successCount / events.length) * 100);
+
+  return (
+    <section id="lab" className="section" aria-label="Interactive Match Lab">
+      <div className="container">
+        <div className="reveal" ref={ref}>
+          <div className="section-tag">Match Lab</div>
+          <h2 className="section-title">Interactive Sports Analytics Lab</h2>
+          <p className="section-subtitle">
+            Demonstrating sports match event logging, spatial mapping, and tactical metrics.
+            Select an event category to filter live on-pitch coordinates and breakdown logs.
+          </p>
+
+          <div className="lab-container">
+            <div className="lab-header">
+              <div className="lab-title-group">
+                <h3>
+                  Sample Match Sequence: 90' Spatial Tracking
+                  <span className="lab-badge">Public Sample Data</span>
+                </h3>
+                <p className="lab-disclaimer">
+                  *Demonstration sandbox showcasing event logging methodology. Does not contain proprietary or confidential club data.
+                </p>
+              </div>
+
+              <div className="lab-filter-row" role="group" aria-label="Event filters">
+                {[
+                  { key: 'passes', label: 'Pass Networks (5)' },
+                  { key: 'tackles', label: 'Tackles & Duels (4)' },
+                  { key: 'shots', label: 'Shot Locations (3)' },
+                  { key: 'aerials', label: 'Aerial Contests (3)' },
+                ].map(tab => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    className={`lab-filter-btn ${activeFilter === tab.key ? 'active' : ''}`}
+                    onClick={() => setActiveFilter(tab.key as MatchEventType)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="lab-body">
+              <div className="lab-pitch-wrapper">
+                {/* Tactical Football Pitch SVG */}
+                <svg
+                  viewBox="0 0 100 70"
+                  className="lab-pitch-svg"
+                  style={{ background: '#0d2818', border: '1px solid rgba(255,255,255,0.15)' }}
+                  role="img"
+                  aria-label="Tactical pitch event visualization"
+                >
+                  {/* Pitch markings */}
+                  <rect x="0" y="0" width="100" height="70" fill="#0e2f1d" />
+                  <rect x="3" y="3" width="94" height="64" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" />
+                  {/* Halfway line & center circle */}
+                  <line x1="50" y1="3" x2="50" y2="67" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" />
+                  <circle cx="50" cy="35" r="9" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" />
+                  <circle cx="50" cy="35" r="0.8" fill="rgba(255,255,255,0.6)" />
+                  {/* Left Penalty Box */}
+                  <rect x="3" y="17.5" width="16" height="35" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" />
+                  <rect x="3" y="26" width="6" height="18" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="0.8" />
+                  {/* Right Penalty Box */}
+                  <rect x="81" y="17.5" width="16" height="35" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" />
+                  <rect x="91" y="26" width="6" height="18" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="0.8" />
+
+                  {/* Render Events */}
+                  {events.map(ev => {
+                    const scaledY = (ev.y / 100) * 64 + 3;
+                    const scaledX = (ev.x / 100) * 94 + 3;
+                    const color = ev.success ? '#10b981' : '#f59e0b';
+
+                    if (ev.type === 'passes' && ev.endX !== undefined && ev.endY !== undefined) {
+                      const endScaledX = (ev.endX / 100) * 94 + 3;
+                      const endScaledY = (ev.endY / 100) * 64 + 3;
+                      return (
+                        <g key={ev.id}>
+                          <line
+                            x1={scaledX}
+                            y1={scaledY}
+                            x2={endScaledX}
+                            y2={endScaledY}
+                            stroke={color}
+                            strokeWidth="1.2"
+                            strokeDasharray={ev.success ? 'none' : '2,1.5'}
+                            opacity="0.85"
+                          />
+                          <circle cx={scaledX} cy={scaledY} r="1.4" fill="#ffffff" />
+                          <circle cx={endScaledX} cy={endScaledY} r="1.8" fill={color} />
+                        </g>
+                      );
+                    }
+
+                    return (
+                      <g key={ev.id}>
+                        <circle
+                          cx={scaledX}
+                          cy={scaledY}
+                          r="3"
+                          fill={color}
+                          opacity="0.85"
+                          stroke="#ffffff"
+                          strokeWidth="0.6"
+                        />
+                        <text
+                          x={scaledX}
+                          y={scaledY - 4}
+                          fontSize="2.4"
+                          fill="#ffffff"
+                          textAnchor="middle"
+                          fontWeight="bold"
+                        >
+                          {ev.minute}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
+
+                <div style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '11.5px', color: 'var(--text-secondary)' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} /> Successful / On-target
+                  </span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }} /> Incomplete / Contested
+                  </span>
+                </div>
+              </div>
+
+              <div className="lab-panel">
+                <div>
+                  <div className="lab-stat-grid">
+                    <div className="lab-stat-box">
+                      <div className="lab-stat-label">Logged Events</div>
+                      <div className="lab-stat-value">{events.length}</div>
+                    </div>
+                    <div className="lab-stat-box">
+                      <div className="lab-stat-label">Success Rate</div>
+                      <div className="lab-stat-value">{accuracy}<span>%</span></div>
+                    </div>
+                  </div>
+
+                  <div className="lab-event-list-title">Match Event Stream</div>
+                  <div className="lab-event-list">
+                    {events.map(ev => (
+                      <div key={ev.id} className={`lab-event-item ${ev.success ? 'success' : 'unsuccessful'}`}>
+                        <div>
+                          <div className="lab-event-desc">{ev.desc}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>{ev.player}</div>
+                        </div>
+                        <span className="lab-event-time">{ev.minute}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border)', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                  <strong>Analyst Workflow:</strong> Match sequences are categorized with spatial timestamps to compute progressive passing index, territorial dominance, and expected performance metrics.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── Education & Certifications ──────────────────────────────
 const CERTIFICATIONS = [
   {
@@ -872,15 +1364,37 @@ function Contact() {
   const ref = useReveal();
   const [form, setForm] = useState<FormState>({ name: '', email: '', subject: '', message: '' });
   const [status, setStatus] = useState<FormStatus>('');
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(RESUME_DATA.personal.email);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // Fallback for older browsers or restricted permissions
+      const el = document.createElement('textarea');
+      el.value = RESUME_DATA.personal.email;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.message) { setStatus('error'); return; }
+    if (!form.name || !form.email || !form.message) {
+      setStatus('error');
+      return;
+    }
     setStatus('sending');
-    const mailtoUrl = `mailto:tejaspatil78787@gmail.com?subject=${encodeURIComponent(form.subject || 'Portfolio Inquiry')}&body=${encodeURIComponent(`Hi Tejas,\n\nName: ${form.name}\nEmail: ${form.email}\n\nMessage:\n${form.message}`)}`;
+    const mailtoUrl = `mailto:${RESUME_DATA.personal.email}?subject=${encodeURIComponent(form.subject || 'Sports Analytics Collaboration')}&body=${encodeURIComponent(`Hi Tejas,\n\nName: ${form.name}\nEmail: ${form.email}\n\nMessage:\n${form.message}`)}`;
     window.location.href = mailtoUrl;
     setStatus('success');
   };
@@ -890,22 +1404,22 @@ function Contact() {
       id: 'contact-email-link',
       icon: <IconEmail/>,
       label: 'Email',
-      value: 'tejaspatil78787@gmail.com',
-      href: 'mailto:tejaspatil78787@gmail.com',
+      value: RESUME_DATA.personal.email,
+      href: `mailto:${RESUME_DATA.personal.email}`,
     },
     {
       id: 'contact-linkedin-link',
       icon: <IconLinkedIn/>,
       label: 'LinkedIn',
-      value: 'linkedin.com/in/tejas-patil-5967a3325',
-      href: 'https://www.linkedin.com/in/tejas-patil-5967a3325/',
+      value: RESUME_DATA.personal.linkedinDisplay,
+      href: RESUME_DATA.personal.linkedin,
     },
     {
       id: 'contact-github-link',
       icon: <IconGitHub/>,
       label: 'GitHub',
-      value: 'github.com/tanmayy44',
-      href: 'https://github.com/tanmayy44',
+      value: RESUME_DATA.personal.githubDisplay,
+      href: RESUME_DATA.personal.github,
     },
   ];
 
@@ -916,42 +1430,61 @@ function Contact() {
           <div className="section-tag">Contact</div>
           <h2 className="section-title">Get In Touch</h2>
           <p className="section-subtitle">
-            Feel free to reach out for sports analytics roles, data inquiries, or collaborations.
+            Open for sports analytics opportunities, match tagging inquiries, and collaborative data projects.
           </p>
 
           <div className="contact-grid">
             <div className="contact-info">
               <p className="contact-intro">
                 I'm always open to discussing new opportunities, match tagging workflows,
-                or sports data analytics projects. Drop me a message and I'll get back to you promptly.
+                or sports data analytics projects. Drop me a direct email or connect through LinkedIn.
               </p>
+
               <div className="contact-channels">
                 {CHANNELS.map(ch => (
-                  <a key={ch.label} id={ch.id} href={ch.href} className="contact-channel"
-                    target={ch.href.startsWith('mailto') ? undefined : '_blank'}
-                    rel="noopener noreferrer">
-                    <div className="channel-icon">{ch.icon}</div>
-                    <div>
-                      <div className="channel-label">{ch.label}</div>
-                      <div className="channel-value">{ch.value}</div>
-                    </div>
-                  </a>
+                  <div key={ch.label} style={{ display: 'flex', flexDirection: 'column' }}>
+                    <a id={ch.id} href={ch.href} className="contact-channel"
+                      target={ch.href.startsWith('mailto') ? undefined : '_blank'}
+                      rel="noopener noreferrer">
+                      <div className="channel-icon">{ch.icon}</div>
+                      <div>
+                        <div className="channel-label">{ch.label}</div>
+                        <div className="channel-value">{ch.value}</div>
+                      </div>
+                    </a>
+                    {ch.label === 'Email' && (
+                      <button
+                        type="button"
+                        className={`copy-email-btn ${copied ? 'copied' : ''}`}
+                        onClick={handleCopyEmail}
+                        aria-label="Copy email address to clipboard"
+                        title="Copy email to clipboard"
+                      >
+                        {copied ? <><IconCheck/> Copied to clipboard!</> : <><IconCopy/> One-click copy email</>}
+                      </button>
+                    )}
+                  </div>
                 ))}
               </div>
-              <div style={{marginTop:'12px',color:'var(--text-secondary)',fontSize:'13px'}}>
-                📍 Nashik, Maharashtra, India · 📞 +91 9673662750
+
+              <div style={{ marginTop: '16px', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                📍 {RESUME_DATA.personal.location} &bull; 📞 {RESUME_DATA.personal.phone}
               </div>
             </div>
 
             <form className="contact-form" onSubmit={handleSubmit} noValidate>
+              <div className="form-helper-note">
+                <strong>Direct Dispatch:</strong> Submitting prepares a pre-filled draft in your default email client addressed directly to {RESUME_DATA.personal.email}.
+              </div>
+
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label" htmlFor="contact-name">Name</label>
+                  <label className="form-label" htmlFor="contact-name">Name *</label>
                   <input id="contact-name" className="form-input" type="text" name="name"
                     placeholder="Your name" value={form.name} onChange={handleChange} required/>
                 </div>
                 <div className="form-group">
-                  <label className="form-label" htmlFor="contact-email">Email</label>
+                  <label className="form-label" htmlFor="contact-email">Email *</label>
                   <input id="contact-email" className="form-input" type="email" name="email"
                     placeholder="your@email.com" value={form.email} onChange={handleChange} required/>
                 </div>
@@ -962,21 +1495,21 @@ function Contact() {
                   placeholder="Sports Analytics / Collaboration" value={form.subject} onChange={handleChange}/>
               </div>
               <div className="form-group">
-                <label className="form-label" htmlFor="contact-message">Message</label>
+                <label className="form-label" htmlFor="contact-message">Message *</label>
                 <textarea id="contact-message" className="form-textarea" name="message"
                   placeholder="Your message..." value={form.message} onChange={handleChange} required/>
               </div>
 
               <div className={`form-status ${status === 'success' ? 'success' : status === 'error' ? 'error' : ''}`}>
-                {status === 'success' && "✓ Opening your email client to send message to Tejas..."}
+                {status === 'success' && "✓ Opened your email client with your message drafted to Tejas."}
                 {status === 'error' && (!form.name || !form.email || !form.message
-                  ? '✗ Please fill in all required fields.'
-                  : '⚠ Opening email client...')}
+                  ? '✗ Please fill in all required fields (Name, Email, Message).'
+                  : '⚠ Preparing email draft...')}
               </div>
 
               <button className="form-submit" type="submit" id="contact-submit-btn"
                 disabled={status === 'sending'}>
-                {status === 'sending' ? 'Sending…' : <><IconSend/> Send Message</>}
+                {status === 'sending' ? 'Opening email client…' : <><IconSend/> Send via Email Client</>}
               </button>
             </form>
           </div>
@@ -1038,20 +1571,85 @@ function Footer() {
 
 // ── Main App Component ──────────────────────────────────────
 export default function App() {
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = localStorage.getItem('tp_theme');
+    if (saved === 'light' || saved === 'dark') return saved;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  });
+
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('tp_theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalHeight > 0) {
+        const currentProgress = (window.scrollY / totalHeight) * 100;
+        setScrollProgress(currentProgress);
+      }
+      setShowBackToTop(window.scrollY > 400);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="portfolio-app">
-      <Navbar />
-      <main>
+      {/* Skip to Content for Screen Readers & Keyboard Users */}
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
+
+      {/* Reading Progress Indicator */}
+      <div
+        className="scroll-progress-bar"
+        style={{ width: `${scrollProgress}%` }}
+        role="progressbar"
+        aria-valuenow={Math.round(scrollProgress)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      />
+
+      <Navbar theme={theme} onToggleTheme={toggleTheme} />
+
+      <main id="main-content">
         <Hero />
         <About />
         <Skills />
         <Experience />
+        <SportsAnalyticsLab />
         <Projects />
         <Education />
         <CTABanner />
         <Contact />
       </main>
+
       <Footer />
+
+      {/* Back to Top Button */}
+      <button
+        type="button"
+        className={`back-to-top-btn ${showBackToTop ? 'visible' : ''}`}
+        onClick={scrollToTop}
+        aria-label="Back to top"
+        title="Back to top"
+      >
+        <IconChevronUp />
+      </button>
     </div>
   );
 }

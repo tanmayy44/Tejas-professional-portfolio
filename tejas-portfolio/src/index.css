@@ -10,7 +10,7 @@
 }
 
 :root {
-  /* Colours */
+  /* Dark Mode (Default) */
   --bg-primary:    #080B0D;
   --bg-secondary:  #111619;
   --bg-card:       #151A1E;
@@ -22,6 +22,9 @@
   --text-secondary:#A8B0B8;
   --border:        rgba(255,255,255,0.07);
   --border-strong: rgba(255,255,255,0.13);
+  --glass-bg:      rgba(17, 22, 25, 0.94);
+  --shadow-sm:     0 2px 8px rgba(0,0,0,0.4);
+  --shadow-lg:     0 12px 32px rgba(0,0,0,0.6);
 
   /* Typography */
   --font-display: 'Outfit', 'Inter', sans-serif;
@@ -36,6 +39,100 @@
   --dur-fast: 180ms;
   --dur-med:  320ms;
   --dur-slow: 500ms;
+}
+
+/* ── Light Mode (Warm White & Charcoal) ───────────────────── */
+[data-theme="light"] {
+  --bg-primary:    #F8F9FA;
+  --bg-secondary:  #EFF1F3;
+  --bg-card:       #FFFFFF;
+  --bg-card-hover: #F2F4F7;
+  --accent:        #D91B25;
+  --accent-dim:    rgba(217, 27, 37, 0.08);
+  --accent-border: rgba(217, 27, 37, 0.32);
+  --text-primary:  #111827;
+  --text-secondary:#4B5563;
+  --border:        rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.16);
+  --glass-bg:      rgba(255, 255, 255, 0.94);
+  --shadow-sm:     0 2px 8px rgba(0,0,0,0.06);
+  --shadow-lg:     0 12px 28px rgba(0,0,0,0.12);
+}
+
+/* ── Skip to Content Link ─────────────────────────────────── */
+.skip-to-content {
+  position: fixed;
+  top: -100px;
+  left: 20px;
+  background: var(--accent);
+  color: #ffffff;
+  padding: 12px 20px;
+  z-index: 10000;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 4px;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+  transition: top var(--dur-fast) var(--ease);
+}
+.skip-to-content:focus {
+  top: 16px;
+  outline: 3px solid #ffffff;
+}
+
+/* ── Focus Outline for Accessible Keyboard Navigation ───────── */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ── Scroll Progress Indicator ────────────────────────────── */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #ff5a60);
+  z-index: 10001;
+  transition: width 80ms linear;
+}
+
+/* ── Back to Top Floating Button ──────────────────────────── */
+.back-to-top-btn {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 44px;
+  height: 44px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  z-index: 998;
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+}
+.back-to-top-btn.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.back-to-top-btn:hover {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(245, 34, 45, 0.4);
 }
 
 html {

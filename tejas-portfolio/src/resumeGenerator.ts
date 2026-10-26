@@ -1,404 +1,355 @@
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, WidthType, Table, TableRow, TableCell } from 'docx';
+import { jsPDF } from 'jspdf';
 import { RESUME_DATA } from './resumeData';
 
-// Generate printable HTML and trigger native browser PDF print dialog
-export function downloadResumePDF() {
+// ── 1. Native Microsoft Word (.docx) Generator ──────────────────
+export async function downloadResumeDocx(): Promise<void> {
   const { personal, experience, education, skillGroups, projects, certifications } = RESUME_DATA;
 
-  const html = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>${personal.name} — Resume</title>
-  <style>
-    @page {
-      size: A4;
-      margin: 12mm 15mm;
-    }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      color: #1a1a1a;
-      background: #ffffff;
-      line-height: 1.45;
-      font-size: 10pt;
-    }
-    .header {
-      border-bottom: 2px solid #b91c1c;
-      padding-bottom: 8px;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-    }
-    .name {
-      font-size: 22pt;
-      font-weight: 700;
-      color: #0f172a;
-      letter-spacing: -0.5px;
-    }
-    .subtitle {
-      font-size: 11pt;
-      color: #b91c1c;
-      font-weight: 600;
-      margin-top: 2px;
-    }
-    .contact-info {
-      text-align: right;
-      font-size: 8.5pt;
-      color: #475569;
-      line-height: 1.5;
-    }
-    .contact-info a {
-      color: #0f172a;
-      text-decoration: none;
-    }
-    .section-title {
-      font-size: 11pt;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: #0f172a;
-      border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 3px;
-      margin-top: 11px;
-      margin-bottom: 7px;
-    }
-    .summary-text {
-      font-size: 9.2pt;
-      color: #334155;
-      text-align: justify;
-    }
-    .item-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 2px;
-    }
-    .item-title {
-      font-weight: 700;
-      font-size: 10pt;
-      color: #0f172a;
-    }
-    .item-company {
-      font-weight: 600;
-      color: #b91c1c;
-    }
-    .item-date {
-      font-size: 8.5pt;
-      color: #64748b;
-      font-weight: 500;
-    }
-    .duties-list {
-      margin-left: 16px;
-      margin-bottom: 6px;
-      font-size: 9pt;
-      color: #334155;
-    }
-    .duties-list li {
-      margin-bottom: 3px;
-    }
-    .skills-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 9pt;
-      margin-top: 4px;
-    }
-    .skills-table td {
-      padding: 3px 0;
-      vertical-align: top;
-    }
-    .skill-cat {
-      font-weight: 700;
-      color: #1e293b;
-      width: 28%;
-    }
-    .skill-vals {
-      color: #475569;
-    }
-    .projects-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 4px;
-    }
-    .project-card {
-      border: 1px solid #e2e8f0;
-      padding: 6px 8px;
-      border-radius: 4px;
-      background: #f8fafc;
-    }
-    .project-card-title {
-      font-size: 9pt;
-      font-weight: 700;
-      color: #0f172a;
-    }
-    .project-card-desc {
-      font-size: 8pt;
-      color: #475569;
-      margin-top: 2px;
-    }
-    .project-card-tech {
-      font-size: 7.5pt;
-      color: #b91c1c;
-      font-weight: 600;
-      margin-top: 3px;
-    }
-    .cert-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px 14px;
-      margin-top: 4px;
-      font-size: 8.5pt;
-    }
-    .cert-item {
-      color: #1e293b;
-    }
-    .cert-item span {
-      color: #64748b;
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div>
-      <h1 class="name">${personal.name}</h1>
-      <div class="subtitle">${personal.title}</div>
-    </div>
-    <div class="contact-info">
-      <div>${personal.location}</div>
-      <div>${personal.phone} | <a href="mailto:${personal.email}">${personal.email}</a></div>
-      <div>LinkedIn: ${personal.linkedinDisplay} | GitHub: ${personal.githubDisplay}</div>
-    </div>
-  </div>
+  const doc = new Document({
+    sections: [
+      {
+        properties: {
+          page: {
+            margin: {
+              top: 720,    // 0.5 inch
+              bottom: 720,
+              left: 720,
+              right: 720,
+            },
+          },
+        },
+        children: [
+          // Header: Name
+          new Paragraph({
+            text: personal.name.toUpperCase(),
+            heading: HeadingLevel.TITLE,
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 60 },
+          }),
+          // Title
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 80 },
+            children: [
+              new TextRun({
+                text: personal.title,
+                bold: true,
+                color: 'B91C1C',
+                size: 22,
+              }),
+            ],
+          }),
+          // Contact line
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 180 },
+            children: [
+              new TextRun({
+                text: `${personal.location}  |  ${personal.phone}  |  ${personal.email}\nLinkedIn: ${personal.linkedinDisplay}  |  GitHub: ${personal.githubDisplay}`,
+                size: 18,
+                color: '4B5563',
+              }),
+            ],
+          }),
 
-  <div class="section-title">Professional Summary</div>
-  <p class="summary-text">${personal.summary}</p>
+          // SECTION: Professional Summary
+          createSectionHeading('PROFESSIONAL SUMMARY'),
+          new Paragraph({
+            spacing: { after: 160 },
+            children: [
+              new TextRun({
+                text: personal.summary,
+                size: 20,
+                color: '1F2937',
+              }),
+            ],
+          }),
 
-  <div class="section-title">Work Experience</div>
-  ${experience.map(exp => `
-    <div style="margin-bottom: 6px;">
-      <div class="item-header">
-        <div>
-          <span class="item-title">${exp.role}</span> &mdash; 
-          <span class="item-company">${exp.company}</span>
-        </div>
-        <div class="item-date">${exp.location} | ${exp.period}</div>
-      </div>
-      <ul class="duties-list">
-        ${exp.duties.map(d => `<li>${d}</li>`).join('')}
-      </ul>
-    </div>
-  `).join('')}
+          // SECTION: Work Experience
+          createSectionHeading('WORK EXPERIENCE'),
+          ...experience.flatMap(exp => [
+            new Paragraph({
+              spacing: { before: 80, after: 40 },
+              children: [
+                new TextRun({ text: exp.role, bold: true, size: 21, color: '111827' }),
+                new TextRun({ text: ` — ${exp.company}`, bold: true, size: 21, color: 'B91C1C' }),
+                new TextRun({ text: `\t${exp.location} | ${exp.period}`, italics: true, size: 18, color: '6B7280' }),
+              ],
+            }),
+            ...exp.duties.map(duty =>
+              new Paragraph({
+                bullet: { level: 0 },
+                spacing: { after: 40 },
+                children: [new TextRun({ text: duty, size: 19, color: '374151' })],
+              })
+            ),
+          ]),
 
-  <div class="section-title">Education</div>
-  ${education.map(edu => `
-    <div style="margin-bottom: 5px;">
-      <div class="item-header">
-        <div>
-          <span class="item-title">${edu.degree}</span> &mdash; 
-          <span style="font-weight: 600; color: #334155;">${edu.institution}</span>
-        </div>
-        <div class="item-date">${edu.location} | ${edu.year}</div>
-      </div>
-      <div style="font-size: 8.5pt; color: #64748b; margin-top: 1px;">
-        ${edu.specialization} ${edu.score ? `&bull; <strong>${edu.score}</strong>` : ''}
-      </div>
-    </div>
-  `).join('')}
+          // SECTION: Education
+          createSectionHeading('EDUCATION'),
+          ...education.map(edu =>
+            new Paragraph({
+              spacing: { before: 60, after: 60 },
+              children: [
+                new TextRun({ text: edu.degree, bold: true, size: 20, color: '111827' }),
+                new TextRun({ text: ` — ${edu.institution}`, size: 20, color: '374151' }),
+                new TextRun({ text: `\t${edu.location} | ${edu.year}`, italics: true, size: 18, color: '6B7280' }),
+                new TextRun({
+                  text: `\n${edu.specialization}${edu.score ? ` (Score: ${edu.score})` : ''}`,
+                  size: 18,
+                  color: '6B7280',
+                }),
+              ],
+            })
+          ),
 
-  <div class="section-title">Technical Toolkit & Competencies</div>
-  <table class="skills-table">
-    ${skillGroups.map(group => `
-      <tr>
-        <td class="skill-cat">${group.title}:</td>
-        <td class="skill-vals">${group.skills.map(s => s.name).join(', ')}</td>
-      </tr>
-    `).join('')}
-  </table>
+          // SECTION: Technical Skills
+          createSectionHeading('TECHNICAL TOOLKIT'),
+          ...skillGroups.map(grp =>
+            new Paragraph({
+              spacing: { after: 40 },
+              children: [
+                new TextRun({ text: `${grp.title}: `, bold: true, size: 19, color: '111827' }),
+                new TextRun({ text: grp.skills.map(s => s.name).join(', '), size: 19, color: '374151' }),
+              ],
+            })
+          ),
 
-  <div class="section-title">Key Analytics & Data Engineering Projects</div>
-  <div class="projects-grid">
-    ${projects.slice(0, 4).map(proj => `
-      <div class="project-card">
-        <div class="project-card-title">${proj.title}</div>
-        <div class="project-card-desc">${proj.description}</div>
-        <div class="project-card-tech">${proj.tech.join(' • ')}</div>
-      </div>
-    `).join('')}
-  </div>
+          // SECTION: Projects
+          createSectionHeading('ANALYTICS & DATA PROJECTS'),
+          ...projects.slice(0, 4).map(proj =>
+            new Paragraph({
+              spacing: { before: 60, after: 60 },
+              children: [
+                new TextRun({ text: proj.title, bold: true, size: 20, color: '111827' }),
+                new TextRun({ text: ` (${proj.category})`, italics: true, size: 18, color: '6B7280' }),
+                new TextRun({ text: `\n${proj.description}`, size: 19, color: '374151' }),
+                new TextRun({ text: `\nTech Stack: ${proj.tech.join(', ')}`, size: 17, color: 'B91C1C', bold: true }),
+              ],
+            })
+          ),
 
-  <div class="section-title">Verified Certifications</div>
-  <div class="cert-list">
-    ${certifications.map(c => `
-      <div class="cert-item">
-        <strong>${c.title}</strong> &mdash; <span>${c.issuer}</span>
-      </div>
-    `).join('')}
-  </div>
-
-  <script>
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        window.print();
-      }, 350);
-    });
-  </script>
-</body>
-</html>
-  `;
-
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const win = window.open(url, '_blank');
-  if (!win) {
-    // Fallback if popup blocked: trigger direct download
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Tejas_Patil_Resume.html`;
-    a.click();
-  }
-}
-
-// Generate Microsoft Word (.doc format) directly from current dynamic data
-export function downloadResumeDoc() {
-  const { personal, experience, education, skillGroups, projects, certifications } = RESUME_DATA;
-
-  const docContent = `
-<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-<head>
-  <meta charset="utf-8">
-  <title>${personal.name} Resume</title>
-  <style>
-    body {
-      font-family: Calibri, Arial, sans-serif;
-      font-size: 11pt;
-      line-height: 1.35;
-      color: #111827;
-      margin: 20mm;
-    }
-    h1 {
-      font-size: 22pt;
-      color: #0f172a;
-      margin: 0;
-      padding: 0;
-    }
-    .subtitle {
-      font-size: 12pt;
-      color: #b91c1c;
-      font-weight: bold;
-      margin-bottom: 6pt;
-    }
-    .contact {
-      font-size: 9.5pt;
-      color: #475569;
-      margin-bottom: 14pt;
-      border-bottom: 2pt solid #b91c1c;
-      padding-bottom: 6pt;
-    }
-    h2 {
-      font-size: 12pt;
-      text-transform: uppercase;
-      color: #0f172a;
-      border-bottom: 1pt solid #cbd5e1;
-      padding-bottom: 2pt;
-      margin-top: 14pt;
-      margin-bottom: 6pt;
-    }
-    p {
-      margin: 0 0 6pt 0;
-      font-size: 10pt;
-    }
-    ul {
-      margin: 3pt 0 8pt 18pt;
-      padding: 0;
-    }
-    li {
-      margin-bottom: 3pt;
-      font-size: 9.5pt;
-    }
-    .bold { font-weight: bold; }
-    .company { color: #b91c1c; font-weight: bold; }
-    .date { float: right; color: #64748b; font-size: 9.5pt; }
-    table { width: 100%; border-collapse: collapse; margin-top: 4pt; }
-    td { padding: 3pt 0; vertical-align: top; font-size: 9.5pt; }
-  </style>
-</head>
-<body>
-  <h1>${personal.name}</h1>
-  <div class="subtitle">${personal.title}</div>
-  <div class="contact">
-    ${personal.location} | Phone: ${personal.phone} | Email: ${personal.email}<br/>
-    LinkedIn: ${personal.linkedin} | GitHub: ${personal.github}
-  </div>
-
-  <h2>Professional Summary</h2>
-  <p>${personal.summary}</p>
-
-  <h2>Professional Experience</h2>
-  ${experience.map(exp => `
-    <p>
-      <span class="bold">${exp.role}</span> &mdash; <span class="company">${exp.company}</span>
-      <span class="date">${exp.location} | ${exp.period}</span>
-    </p>
-    <ul>
-      ${exp.duties.map(d => `<li>${d}</li>`).join('')}
-    </ul>
-  `).join('')}
-
-  <h2>Education</h2>
-  ${education.map(edu => `
-    <p>
-      <span class="bold">${edu.degree}</span> &mdash; <span>${edu.institution}</span>
-      <span class="date">${edu.location} | ${edu.year}</span><br/>
-      <span style="color:#64748b; font-size: 9pt;">${edu.specialization} ${edu.score ? `(${edu.score})` : ''}</span>
-    </p>
-  `).join('')}
-
-  <h2>Technical Skills</h2>
-  <table>
-    ${skillGroups.map(grp => `
-      <tr>
-        <td width="30%" class="bold">${grp.title}:</td>
-        <td width="70%">${grp.skills.map(s => s.name).join(', ')}</td>
-      </tr>
-    `).join('')}
-  </table>
-
-  <h2>Featured Analytics Projects</h2>
-  ${projects.map(proj => `
-    <p>
-      <span class="bold">${proj.title}</span> (${proj.category})<br/>
-      <span>${proj.description}</span><br/>
-      <span style="color:#b91c1c; font-size: 8.5pt;">Technologies: ${proj.tech.join(', ')}</span>
-    </p>
-  `).join('')}
-
-  <h2>Verified Certifications</h2>
-  <ul>
-    ${certifications.map(c => `
-      <li><strong>${c.title}</strong> &mdash; ${c.issuer}</li>
-    `).join('')}
-  </ul>
-</body>
-</html>
-  `;
-
-  const blob = new Blob(['\ufeff' + docContent], {
-    type: 'application/msword;charset=utf-8'
+          // SECTION: Certifications
+          createSectionHeading('VERIFIED CERTIFICATIONS'),
+          ...certifications.map(cert =>
+            new Paragraph({
+              bullet: { level: 0 },
+              spacing: { after: 40 },
+              children: [
+                new TextRun({ text: `${cert.title} `, bold: true, size: 19, color: '111827' }),
+                new TextRun({ text: `— ${cert.issuer}`, size: 19, color: '374151' }),
+                ...(cert.credentialId ? [new TextRun({ text: ` (Credential ID: ${cert.credentialId})`, size: 17, color: '6B7280' })] : []),
+              ],
+            })
+          ),
+        ],
+      },
+    ],
   });
+
+  const blob = await Packer.toBlob(doc);
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `Tejas_Patil_Resume.doc`;
+  a.download = `Tejas_Patil_Resume.docx`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+function createSectionHeading(title: string): Paragraph {
+  return new Paragraph({
+    spacing: { before: 180, after: 80 },
+    border: {
+      bottom: {
+        color: 'B91C1C',
+        space: 2,
+        style: BorderStyle.SINGLE,
+        size: 12,
+      },
+    },
+    children: [
+      new TextRun({
+        text: title,
+        bold: true,
+        size: 21,
+        color: '111827',
+      }),
+    ],
+  });
+}
+
+// ── 2. Native ATS-Compliant PDF Generator (jsPDF) ───────────────
+export function downloadResumePDF(): void {
+  const { personal, experience, education, skillGroups, projects, certifications } = RESUME_DATA;
+
+  // Standard A4 PDF (210 x 297 mm)
+  const doc = new jsPDF({
+    unit: 'mm',
+    format: 'a4',
+    orientation: 'portrait',
+  });
+
+  const marginX = 14;
+  const pageWidth = 210;
+  const contentWidth = pageWidth - marginX * 2;
+  let cursorY = 16;
+
+  // Helper for section divider
+  const addSection = (title: string) => {
+    cursorY += 3;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10.5);
+    doc.setTextColor(17, 24, 39);
+    doc.text(title.toUpperCase(), marginX, cursorY);
+    cursorY += 1.5;
+    doc.setDrawColor(185, 28, 28); // Deep red rule
+    doc.setLineWidth(0.4);
+    doc.line(marginX, cursorY, marginX + contentWidth, cursorY);
+    cursorY += 4.5;
+  };
+
+  // Header: Name
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(17, 24, 39);
+  doc.text(personal.name, marginX, cursorY);
+  cursorY += 5.5;
+
+  // Title
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(185, 28, 28);
+  doc.text(personal.title, marginX, cursorY);
+  cursorY += 4.5;
+
+  // Contact Info line
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(75, 85, 99);
+  const contactText = `${personal.location}  •  ${personal.phone}  •  ${personal.email}`;
+  const socialText = `LinkedIn: ${personal.linkedinDisplay}  •  GitHub: ${personal.githubDisplay}`;
+  doc.text(contactText, marginX, cursorY);
+  cursorY += 3.8;
+  doc.text(socialText, marginX, cursorY);
+  cursorY += 4;
+
+  // Summary
+  addSection('Professional Summary');
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(55, 65, 81);
+  const splitSummary = doc.splitTextToSize(personal.summary, contentWidth);
+  doc.text(splitSummary, marginX, cursorY);
+  cursorY += splitSummary.length * 4;
+
+  // Experience
+  addSection('Work Experience');
+  experience.forEach(exp => {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(17, 24, 39);
+    doc.text(exp.role, marginX, cursorY);
+
+    doc.setTextColor(185, 28, 28);
+    const roleWidth = doc.getTextWidth(exp.role);
+    doc.text(` — ${exp.company}`, marginX + roleWidth, cursorY);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(107, 114, 128);
+    doc.text(`${exp.location} | ${exp.period}`, marginX + contentWidth, cursorY, { align: 'right' });
+    cursorY += 4;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(55, 65, 81);
+    exp.duties.forEach(duty => {
+      const splitDuty = doc.splitTextToSize(`•  ${duty}`, contentWidth - 4);
+      doc.text(splitDuty, marginX + 2, cursorY);
+      cursorY += splitDuty.length * 3.6;
+    });
+    cursorY += 1;
+  });
+
+  // Education
+  addSection('Education');
+  education.forEach(edu => {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.8);
+    doc.setTextColor(17, 24, 39);
+    doc.text(edu.degree, marginX, cursorY);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(107, 114, 128);
+    doc.text(`${edu.location} | ${edu.year}`, marginX + contentWidth, cursorY, { align: 'right' });
+    cursorY += 3.8;
+
+    doc.setTextColor(75, 85, 99);
+    doc.text(`${edu.institution} — ${edu.specialization}${edu.score ? ` (${edu.score})` : ''}`, marginX, cursorY);
+    cursorY += 4.2;
+  });
+
+  // Technical Toolkit
+  addSection('Technical Skills');
+  doc.setFontSize(8);
+  skillGroups.forEach(grp => {
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(17, 24, 39);
+    doc.text(`${grp.title}:`, marginX, cursorY);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(55, 65, 81);
+    doc.text(grp.skills.map(s => s.name).join(', '), marginX + 48, cursorY);
+    cursorY += 4;
+  });
+
+  // Projects
+  addSection('Selected Projects');
+  projects.slice(0, 3).forEach(proj => {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(17, 24, 39);
+    doc.text(proj.title, marginX, cursorY);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(185, 28, 28);
+    doc.text(`[${proj.category}]`, marginX + contentWidth, cursorY, { align: 'right' });
+    cursorY += 3.5;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(75, 85, 99);
+    const splitDesc = doc.splitTextToSize(proj.description, contentWidth);
+    doc.text(splitDesc, marginX, cursorY);
+    cursorY += splitDesc.length * 3.3;
+
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(7.5);
+    doc.setTextColor(107, 114, 128);
+    doc.text(`Tech: ${proj.tech.join(', ')}`, marginX, cursorY);
+    cursorY += 4;
+  });
+
+  // Certifications
+  addSection('Verified Certifications');
+  doc.setFontSize(8);
+  certifications.forEach(cert => {
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(17, 24, 39);
+    doc.text(`•  ${cert.title}`, marginX + 2, cursorY);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(75, 85, 99);
+    const titleW = doc.getTextWidth(`•  ${cert.title}`);
+    const cred = cert.credentialId ? ` (ID: ${cert.credentialId})` : '';
+    doc.text(` — ${cert.issuer}${cred}`, marginX + 2 + titleW, cursorY);
+    cursorY += 3.8;
+  });
+
+  // Save ATS PDF file
+  doc.save(`Tejas_Patil_Resume.pdf`);
 }

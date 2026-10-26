@@ -1,5 +1,9 @@
 // Single Source of Truth for Tejas Patil's Profile & Dynamic CV Generation
-// Any changes made here immediately update the website sections AND the live generated PDF / DOCX resumes!
+// Any changes made here immediately update:
+// 1. The website sections (Hero, About, Skills, Experience, Education, Projects, Certifications)
+// 2. The interactive in-browser Résumé Preview Modal
+// 3. The generated ATS-compliant PDF
+// 4. The generated native Microsoft Word (.docx) file
 
 export interface EducationItem {
   degree: string;
@@ -37,6 +41,7 @@ export interface CertificationItem {
   issuer: string;
   url: string;
   icon: string;
+  credentialId?: string;
 }
 
 export interface SkillCategory {
@@ -49,13 +54,13 @@ export const RESUME_DATA = {
     name: 'Tejas Patil',
     title: 'Sports Data Analyst | Business Analytics Professional',
     email: 'tejaspatil78787@gmail.com',
-    phone: '+91 9356619163',
+    phone: '+91 9673662750',
     location: 'Nashik, Maharashtra, India',
     linkedin: 'https://www.linkedin.com/in/tejas-patil-5967a3325/',
     linkedinDisplay: 'linkedin.com/in/tejas-patil-5967a3325',
     github: 'https://github.com/tanmayy44',
     githubDisplay: 'github.com/tanmayy44',
-    summary: 'Proactive MBA candidate in Business Analytics and Bachelor of Computer Applications graduate with hands-on expertise in sports match tagging, roster workflows, statistical analysis, and interactive dashboard storytelling using Python, SQL, Power BI, and Tableau. Currently contributing as a Sports Analyst at Spiideo, ensuring data quality, match integrity, and analytical fidelity across high-volume athletic performance data pipelines.'
+    summary: 'Master\'s student in Business Analytics and Bachelor of Computer Applications graduate with hands-on expertise in sports match tagging, roster workflows, statistical modeling, and data visualization using Python, SQL, Power BI, and Tableau. Currently contributing as a Sports Analyst at Spiideo, ensuring data quality, match integrity, and analytical fidelity across high-volume athletic performance data pipelines.'
   },
 
   experience: [
@@ -208,9 +213,10 @@ export const RESUME_DATA = {
 
   certifications: [
     {
-      title: 'Power BI Job Simulation',
-      issuer: 'PwC Switzerland / Forage',
-      url: 'https://drive.google.com/file/d/15M0i-u4f56U18c9yTvh0JcTfqjC9mR1p/view?usp=sharing',
+      title: 'Data Analyst Certificate',
+      issuer: 'Physics Wallah (PW Skills)',
+      url: 'https://pwskills.com/learn/certificate/8d99c2f3-38db-42de-9faa-f9abde9f366f',
+      credentialId: '8d99c2f3-38db-42de-9faa-f9abde9f366f',
       icon: '📊'
     },
     {
