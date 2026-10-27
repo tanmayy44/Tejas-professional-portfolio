@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './components.css';
 import { RESUME_DATA } from './resumeData';
+import type { ProjectItem, ProjectCaseStudy } from './resumeData';
 import { downloadResumePDF, downloadResumeDocx } from './resumeGenerator';
 
 // ── Asset imports ───────────────────────────────────────────
@@ -833,8 +834,6 @@ function Experience() {
 }
 
 // ── Projects ────────────────────────────────────────────────
-import type { ProjectItem, ProjectCaseStudy } from './resumeData';
-
 type Project = ProjectItem & {
   image: string | null;
 };
