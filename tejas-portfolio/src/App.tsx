@@ -9,6 +9,8 @@ import projectFootball from './assets/images/project_football.jpg';
 import projectHousePrice from './assets/images/project_house_price.jpg';
 import projectHeartHealth from './assets/images/project_heart_health.jpg';
 import projectMovies from './assets/images/project_movies.jpg';
+import projectCurriculab from './assets/images/project_curriculab.jpg';
+import projectMedia from './assets/images/project_media.jpg';
 
 // ── SVG Icons ───────────────────────────────────────────────
 const IconLinkedIn = () => (
@@ -290,9 +292,10 @@ function ResumeModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
             <div className="resume-sheet-sec-title">Verified Certifications</div>
             <ul className="resume-sheet-ul">
               {certifications.map(cert => (
-                <li key={cert.title}>
+                <li key={cert.id || cert.title}>
                   <strong>{cert.title}</strong> — {cert.issuer}
-                  {cert.credentialId && <span style={{ color: '#6b7280' }}> (Credential ID: {cert.credentialId})</span>}
+                  {cert.completionDate && <span style={{ color: '#4b5563' }}> ({cert.completionDate}{cert.duration ? ` · ${cert.duration}` : ''})</span>}
+                  {cert.credentialId && <span style={{ color: '#6b7280' }}> [ID: {cert.credentialId}]</span>}
                 </li>
               ))}
             </ul>
@@ -430,7 +433,7 @@ function useReveal() {
 }
 
 // ── Navbar ──────────────────────────────────────────────────
-const NAV_LINKS = ['Home', 'About', 'Skills', 'Experience', 'Projects', 'Education', 'Contact'];
+const NAV_LINKS = ['Home', 'About', 'Skills', 'Experience', 'Projects', 'Education', 'Certifications', 'Contact'];
 
 function Navbar({ theme, onToggleTheme }: { theme: 'dark' | 'light'; onToggleTheme: () => void }) {
   const [scrolled, setScrolled] = useState(false);
@@ -555,10 +558,13 @@ function Hero() {
             Tejas <span className="hero-name-accent">Patil.</span>
           </h1>
 
+          <div className="hero-role-title">
+            Sports Data Analyst <span className="hero-role-divider">•</span> Business Analytics Professional
+          </div>
+
           <p className="hero-description">
-            I work as a Sports Analyst at Spiideo, focusing on live sports match tagging,
-            roster pipelines, and data quality. Backed by my BCA in Data Analytics and current MBA studies,
-            I build clear dashboards and data models in Python, SQL, Power BI, and Tableau.
+            Analyzing high-volume athletic match events at Spiideo and turning complex data into actionable performance intelligence.
+            Armed with a BCA in Data Analytics and MBA candidate training, I build predictive models and executive dashboards in Python, SQL, Power BI, and Tableau.
           </p>
 
           <div className="hero-actions">
@@ -827,152 +833,340 @@ function Experience() {
 }
 
 // ── Projects ────────────────────────────────────────────────
-type Project = {
-  id: string;
-  title: string;
-  category: string;
-  tag: string;
-  tagClass: string;
+import type { ProjectItem, ProjectCaseStudy } from './resumeData';
+
+type Project = ProjectItem & {
   image: string | null;
-  objective: string;
-  description: string;
-  tech: string[];
-  viewUrl: string | null;
-  githubUrl: string | null;
 };
 
-const PROJECTS: Project[] = [
-  {
-    id: 'proj-curriculab',
-    title: 'CurricuLab — Study Management Platform',
-    category: 'Full-Stack & AI',
-    tag: 'Full-Stack & AI',
-    tagClass: 'tag-sports',
-    image: projectFootball,
-    objective: 'Build an AI-powered student-centric study management system.',
-    description: 'Collaboratively engineered an interactive platform featuring Supabase database integration, LLM APIs for AI academic assistance, and Google Classroom API synchronization.',
-    tech: ['Python', 'Supabase', 'LLM APIs', 'Google Classroom API'],
-    viewUrl: 'https://curriculab-sj6g.onrender.com/',
-    githubUrl: 'https://github.com/tanmayy44/Tejas-professional-portfolio',
-  },
-  {
-    id: 'proj-football',
-    title: 'Football Match Analysis & Passing Networks',
-    category: 'Sports Analytics',
-    tag: 'Sports Analytics',
-    tagClass: 'tag-sports',
-    image: projectFootball,
-    objective: 'Analyse match event logs to discover tactical patterns and player performance.',
-    description: 'Explored football match events using Python and visualization libraries to plot passing networks, spatial heat maps, and player possession metrics.',
-    tech: ['Python', 'Pandas', 'Matplotlib', 'Sports Analytics'],
-    viewUrl: 'https://github.com/tanmayy44/Tejas-professional-portfolio',
-    githubUrl: 'https://github.com/tanmayy44/Tejas-professional-portfolio',
-  },
-  {
-    id: 'proj-house',
-    title: 'House Price Prediction Model',
-    category: 'Machine Learning',
-    tag: 'Machine Learning',
-    tagClass: 'tag-ml',
-    image: projectHousePrice,
-    objective: 'Predict residential property values using supervised regression models.',
-    description: 'Engineered multi-variable features and trained regression algorithms in Scikit-learn with rigorous cross-validation and feature importance evaluation.',
-    tech: ['Python', 'Scikit-learn', 'Pandas', 'NumPy', 'Regression'],
-    viewUrl: 'https://github.com/tanmayy44/Tejas-professional-portfolio',
-    githubUrl: 'https://github.com/tanmayy44/Tejas-professional-portfolio',
-  },
-  {
-    id: 'proj-heart',
-    title: 'Heart Health Biometric Data Analysis',
-    category: 'Data Analysis',
-    tag: 'Health Analytics',
-    tagClass: 'tag-health',
-    image: projectHeartHealth,
-    objective: 'Perform exploratory analysis on cardiovascular health data to identify risk factors.',
-    description: 'Conducted exploratory data analysis on cardiovascular datasets, analyzing correlations between blood pressure, cholesterol, and health outcomes.',
-    tech: ['Python', 'Pandas', 'Matplotlib', 'EDA'],
-    viewUrl: 'https://github.com/tanmayy44/Tejas-professional-portfolio',
-    githubUrl: 'https://github.com/tanmayy44/Tejas-professional-portfolio',
-  },
-  {
-    id: 'proj-bi-sales',
-    title: 'Executive BI & Sales Analytics Dashboard',
-    category: 'Business Intelligence',
-    tag: 'Business Analytics',
-    tagClass: 'tag-bi',
-    image: projectMovies,
-    objective: 'Build a multi-dimensional Power BI dashboard for organizational KPI visibility.',
-    description: 'Created dynamic executive dashboards with DAX calculations and data modeling to deliver real-time KPI tracking, revenue trends, and departmental insights.',
-    tech: ['Power BI', 'Excel', 'DAX', 'SQL', 'Data Visualisation'],
-    viewUrl: 'https://github.com/tanmayy44/Tejas-professional-portfolio',
-    githubUrl: 'https://github.com/tanmayy44/Tejas-professional-portfolio',
-  },
-  {
-    id: 'proj-movies',
-    title: 'Media & Streaming Trends Analytics',
-    category: 'Business Intelligence',
-    tag: 'Media Analytics',
-    tagClass: 'tag-media',
-    image: projectMovies,
-    objective: 'Visualise viewership ratings, genre popularity, and platform performance.',
-    description: 'Analyzed streaming catalog trends and rating distributions using Power BI and Excel dashboards to visualize audience engagement patterns.',
-    tech: ['Power BI', 'Excel', 'DAX', 'Data Visualisation'],
-    viewUrl: 'https://github.com/tanmayy44/Tejas-professional-portfolio',
-    githubUrl: 'https://github.com/tanmayy44/Tejas-professional-portfolio',
-  },
-];
+const PROJECT_IMAGE_MAP: Record<string, string> = {
+  'proj-curriculab': projectCurriculab,
+  'proj-football': projectFootball,
+  'proj-house': projectHousePrice,
+  'proj-heart': projectHeartHealth,
+  'proj-bi-sales': projectMovies,
+  'proj-movies': projectMedia,
+};
+
+const PROJECTS: Project[] = RESUME_DATA.projects.map(p => ({
+  ...p,
+  image: PROJECT_IMAGE_MAP[p.id] || null,
+}));
 
 const FILTER_CATS = ['All', 'Sports Analytics', 'Machine Learning', 'Business Intelligence', 'Data Analysis'];
 
-function ProjectCard({ project }: { project: Project }) {
+// ── Project Case Study Modal ────────────────────────────────
+function ProjectCaseStudyModal({
+  project,
+  isOpen,
+  onClose,
+}: {
+  project: Project | null;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+      modalRef.current?.focus();
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !project) return null;
+
+  return (
+    <div
+      className="case-study-backdrop"
+      onClick={e => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="case-study-heading"
+    >
+      <div className="case-study-dialog" ref={modalRef} tabIndex={-1}>
+        {/* Modal Header */}
+        <div className="case-study-header">
+          <div className="case-study-title-wrap">
+            <span className={`project-cat-tag ${project.tagClass}`} style={{ position: 'static' }}>
+              {project.tag}
+            </span>
+            <h2 className="case-study-title" id="case-study-heading">
+              {project.title}
+            </h2>
+          </div>
+          <button
+            type="button"
+            className="resume-close-btn"
+            onClick={onClose}
+            aria-label="Close Case Study"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Modal Scroll Body */}
+        <div className="case-study-body">
+          {/* Visual banner */}
+          {project.image && (
+            <div className="case-study-media">
+              <img
+                src={project.image}
+                alt={project.thumbnailAlt || `${project.title} visual`}
+                className="case-study-img"
+              />
+              {project.thumbnailIsIllustration && (
+                <div className="case-study-badge-note">
+                  🎨 Illustrative Project Concept / Visual Mockup
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Quick Meta Grid */}
+          <div className="case-study-meta-grid">
+            <div className="case-study-meta-card">
+              <span className="case-study-meta-label">Domain</span>
+              <span className="case-study-meta-val">{project.category}</span>
+            </div>
+            <div className="case-study-meta-card">
+              <span className="case-study-meta-label">Core Tech</span>
+              <span className="case-study-meta-val">{project.tech.join(', ')}</span>
+            </div>
+            <div className="case-study-meta-card">
+              <span className="case-study-meta-label">Repository Status</span>
+              <span className="case-study-meta-val">
+                {project.hasVerifiedCodeUrl ? 'Verified Public Repo' : 'Pending Repository Link'}
+              </span>
+            </div>
+          </div>
+
+          {/* Structured Case Study Sections */}
+          <div className="case-study-sections">
+            {/* 1. Problem Statement */}
+            <div className="case-study-block">
+              <h3 className="case-study-sec-title">
+                <span className="case-study-icon">🎯</span> Problem Statement
+              </h3>
+              <p className="case-study-text">{project.caseStudy.problem}</p>
+            </div>
+
+            {/* 2. Tools & Stack */}
+            <div className="case-study-block">
+              <h3 className="case-study-sec-title">
+                <span className="case-study-icon">🛠️</span> Tools &amp; Technologies
+              </h3>
+              <div className="case-study-tags">
+                {project.caseStudy.toolsUsed.map(tool => (
+                  <span key={tool} className="tech-tag" style={{ fontSize: '12px', padding: '4px 10px' }}>
+                    {tool}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. Approach & Methodology */}
+            <div className="case-study-block">
+              <h3 className="case-study-sec-title">
+                <span className="case-study-icon">🧭</span> Analytical Approach &amp; Workflow
+              </h3>
+              <ul className="case-study-list">
+                {project.caseStudy.approach.map((step, idx) => (
+                  <li key={idx}>{step}</li>
+                ))}
+              </ul>
+            </div>
+
+            {/* 4. Verified Output & Deliverables */}
+            <div className="case-study-block">
+              <h3 className="case-study-sec-title">
+                <span className="case-study-icon">📊</span> Verified Output &amp; Deliverables
+              </h3>
+              <ul className="case-study-list">
+                {project.caseStudy.verifiedOutput.map((out, idx) => (
+                  <li key={idx}>{out}</li>
+                ))}
+              </ul>
+            </div>
+
+            {/* 5. What I Learned */}
+            <div className="case-study-block learning">
+              <h3 className="case-study-sec-title">
+                <span className="case-study-icon">💡</span> Analyst Takeaway &amp; Key Learnings
+              </h3>
+              <p className="case-study-text">{project.caseStudy.whatILearned}</p>
+            </div>
+          </div>
+
+          {/* Case Study Footer Actions */}
+          <div className="case-study-footer">
+            {project.hasVerifiedDemoUrl && project.viewUrl ? (
+              <a
+                href={project.viewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary"
+              >
+                Launch Live App <IconExternal />
+              </a>
+            ) : (
+              <span className="case-study-pending-link">
+                ℹ️ Live demonstration hosted in project environment
+              </span>
+            )}
+
+            {project.hasVerifiedCodeUrl && project.githubUrl ? (
+              <a
+                href={project.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-outline"
+              >
+                <IconGitHub /> View Repository
+              </a>
+            ) : (
+              <span className="case-study-pending-link">
+                🔒 Dedicated GitHub repo link pending verification
+              </span>
+            )}
+
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={onClose}
+              style={{ marginLeft: 'auto' }}
+            >
+              Close Breakdown
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProjectCard({
+  project,
+  onOpenCaseStudy,
+}: {
+  project: Project;
+  onOpenCaseStudy: (p: Project) => void;
+}) {
   return (
     <article className="project-card" id={project.id} aria-label={project.title}>
       <div className="project-thumb">
         {project.image ? (
-          <img src={project.image} alt={`${project.title} screenshot`} loading="lazy"/>
+          <img
+            src={project.image}
+            alt={project.thumbnailAlt || `${project.title} screenshot`}
+            loading="lazy"
+          />
         ) : (
-          <div style={{
-            width:'100%', height:'100%', background:'var(--bg-card)',
-            display:'flex', alignItems:'center', justifyContent:'center',
-            flexDirection:'column', gap:'8px', color:'var(--text-secondary)',
-            fontSize:'12px', padding:'16px', textAlign:'center',
-          }}>
-            <span style={{fontSize:'28px', opacity:0.4}}>📊</span>
-            <span style={{opacity:0.5}}>Analytics Project</span>
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              background: 'var(--bg-card)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: '8px',
+              color: 'var(--text-secondary)',
+              fontSize: '12px',
+              padding: '16px',
+              textAlign: 'center',
+            }}
+          >
+            <span style={{ fontSize: '28px', opacity: 0.4 }}>📊</span>
+            <span style={{ opacity: 0.5 }}>Analytics Project</span>
           </div>
         )}
         <span className={`project-cat-tag ${project.tagClass}`}>{project.tag}</span>
+        {project.thumbnailIsIllustration && (
+          <span className="project-illus-tag" title="Illustrative concept representation">
+            Concept
+          </span>
+        )}
         <div className="project-thumb-overlay">
-          {project.viewUrl && (
-            <a href={project.viewUrl} target="_blank" rel="noopener noreferrer"
-              className="btn btn-primary" style={{fontSize:'12px',padding:'8px 14px'}}>
-              View Project <IconExternal/>
-            </a>
-          )}
+          <button
+            type="button"
+            className="btn btn-primary"
+            style={{ fontSize: '12px', padding: '8px 14px' }}
+            onClick={() => onOpenCaseStudy(project)}
+          >
+            Case Study Breakdown <IconArrow />
+          </button>
         </div>
       </div>
 
       <div className="project-body">
         <h3 className="project-title">{project.title}</h3>
-        <p className="project-desc" style={{fontSize:'12px',color:'var(--accent)',fontWeight:600,marginBottom:'-4px'}}>
-          Objective: <span style={{color:'var(--text-secondary)',fontWeight:400}}>{project.objective}</span>
+        <p className="project-objective-line">
+          Objective: <span>{project.objective}</span>
         </p>
         <p className="project-desc">{project.description}</p>
 
         <div className="project-tech">
-          {project.tech.map(t => <span key={t} className="tech-tag">{t}</span>)}
+          {project.tech.map(t => (
+            <span key={t} className="tech-tag">
+              {t}
+            </span>
+          ))}
         </div>
 
         <div className="project-actions">
-          {project.viewUrl && (
-            <a href={project.viewUrl} target="_blank" rel="noopener noreferrer" className="project-link-btn primary" id={`${project.id}-view`}>
-              {project.viewUrl.includes('render.com') ? 'Live App' : 'View Project'} <IconArrow/>
+          <button
+            type="button"
+            className="project-link-btn primary"
+            onClick={() => onOpenCaseStudy(project)}
+            id={`${project.id}-case-study`}
+          >
+            Case Study <IconArrow />
+          </button>
+
+          {project.hasVerifiedDemoUrl && project.viewUrl ? (
+            <a
+              href={project.viewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="project-link-btn"
+              id={`${project.id}-view`}
+              title="Open Live Application"
+            >
+              Live Demo <IconExternal />
             </a>
-          )}
-          {project.githubUrl && (
-            <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="project-link-btn" id={`${project.id}-github`}>
-              <IconGitHub/> Code
+          ) : project.hasVerifiedCodeUrl && project.githubUrl ? (
+            <a
+              href={project.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="project-link-btn"
+              id={`${project.id}-github`}
+            >
+              <IconGitHub /> Code
             </a>
+          ) : (
+            <button
+              type="button"
+              className="project-link-btn pending-link"
+              onClick={() => onOpenCaseStudy(project)}
+              title="Repo link pending verification"
+            >
+              Repo Pending
+            </button>
           )}
         </div>
       </div>
@@ -982,6 +1176,7 @@ function ProjectCard({ project }: { project: Project }) {
 
 function Projects() {
   const [filter, setFilter] = useState('All');
+  const [activeCaseStudy, setActiveCaseStudy] = useState<Project | null>(null);
   const ref = useReveal();
 
   const filtered = filter === 'All'
@@ -994,29 +1189,47 @@ function Projects() {
         <div className="reveal" ref={ref}>
           <div className="projects-header">
             <div>
-              <div className="section-tag">Projects</div>
-              <h2 className="section-title">Featured Projects</h2>
-              <p className="section-subtitle">Real-world applications across sports analytics, machine learning, and business intelligence.</p>
+              <div className="section-tag">Projects &amp; Case Studies</div>
+              <h2 className="section-title">Verified Project Case Studies</h2>
+              <p className="section-subtitle">
+                Deep-dives into problem statements, analytical methodology, and verified outputs across sports analytics, machine learning, and BI.
+              </p>
             </div>
           </div>
 
           <div className="projects-filters" role="tablist" aria-label="Filter projects">
             {FILTER_CATS.map(cat => (
-              <button key={cat}
+              <button
+                key={cat}
                 className={`filter-btn ${filter === cat ? 'active' : ''}`}
                 onClick={() => setFilter(cat)}
-                role="tab" aria-selected={filter === cat}
-                id={`filter-${cat.replace(/\s+/g,'-').toLowerCase()}`}>
+                role="tab"
+                aria-selected={filter === cat}
+                id={`filter-${cat.replace(/\s+/g, '-').toLowerCase()}`}
+              >
                 {cat}
               </button>
             ))}
           </div>
 
           <div className="projects-grid" role="tabpanel">
-            {filtered.map(p => <ProjectCard key={p.id} project={p}/>)}
+            {filtered.map(p => (
+              <ProjectCard
+                key={p.id}
+                project={p}
+                onOpenCaseStudy={proj => setActiveCaseStudy(proj)}
+              />
+            ))}
           </div>
         </div>
       </div>
+
+      {/* Accessible Project Case Study Modal */}
+      <ProjectCaseStudyModal
+        project={activeCaseStudy}
+        isOpen={activeCaseStudy !== null}
+        onClose={() => setActiveCaseStudy(null)}
+      />
     </section>
   );
 }
@@ -1238,91 +1451,118 @@ function SportsAnalyticsLab() {
   );
 }
 
-// ── Education & Certifications ──────────────────────────────
-const CERTIFICATIONS = [
-  {
-    title: 'Data Analyst Certificate',
-    issuer: 'Physics Wallah (PW Skills)',
-    url: 'https://pwskills.com/learn/certificate/8d99c2f3-38db-42de-9faa-f9abde9f366f',
-    icon: '📊',
-  },
-  {
-    title: 'Generative AI Specialization',
-    issuer: 'Sixladders Completion Certificate',
-    url: 'https://drive.google.com/file/d/1Ayj9zpOZeUZc5lqndEjZdOcYiyXvfsd-/view?usp=sharing',
-    icon: '🤖',
-  },
-  {
-    title: 'Power BI Training Program',
-    issuer: 'Rubicon Skill Development PVT. LTD',
-    url: 'https://drive.google.com/file/d/1iXE5qB5HfknPRDMRHjfifrIA8ZCLZDju/view?usp=sharing',
-    icon: '📈',
-  },
-  {
-    title: 'Machine Learning (Orange Tool)',
-    issuer: 'School of Machine Learning Autonomous Institute',
-    url: 'https://drive.google.com/file/d/1fbML3FbijJ8ZpFOQjWkALKI-Y920ugwB/view?usp=sharing',
-    icon: '⚙️',
-  },
-];
-
+// ── Education ───────────────────────────────────────────────
 function Education() {
   const ref = useReveal();
+  const { education } = RESUME_DATA;
+
   return (
     <section id="education" className="section" aria-label="Education section">
       <div className="container">
         <div className="reveal" ref={ref}>
-          <div className="section-tag">Education &amp; Credentials</div>
-          <h2 className="section-title">Academic Background &amp; Certifications</h2>
-          <p className="section-subtitle">Formal education in analytics paired with industry-verified professional credentials.</p>
+          <div className="section-tag">Education</div>
+          <h2 className="section-title">Academic Background</h2>
+          <p className="section-subtitle">
+            Formal education in analytics and business strategy, building a rigorous foundation in quantitative reasoning and data-informed decision-making.
+          </p>
 
           <div className="education-grid">
-            <div className="edu-card">
-              <div className="edu-icon">🎓</div>
-              <div className="edu-degree">Master of Business Administration (MBA)</div>
-              <div className="edu-university">Sandip University, Nashik</div>
-              <p style={{fontSize:'12.5px',color:'var(--text-secondary)',marginBottom:'10px'}}>
-                Specialization in Business Analytics &amp; Strategic Decision-Making
-              </p>
-              <div className="edu-meta">
-                <span className="edu-year"><IconCalendar/> 2025 – 2027</span>
-                <span className="edu-location"><IconLocation/> Nashik, India</span>
+            {education.map(edu => (
+              <div key={edu.degree} className="edu-card">
+                <div className="edu-icon">{edu.degree.includes('Master') ? '🎓' : '💻'}</div>
+                <div className="edu-degree">{edu.degree}</div>
+                <div className="edu-university">{edu.institution}</div>
+                <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', marginBottom: '10px' }}>
+                  {edu.specialization}{edu.score ? ` · ${edu.score}` : ''}
+                </p>
+                <div className="edu-meta">
+                  <span className="edu-year"><IconCalendar /> {edu.year}</span>
+                  <span className="edu-location"><IconLocation /> {edu.location}</span>
+                </div>
               </div>
-            </div>
-
-            <div className="edu-card">
-              <div className="edu-icon">💻</div>
-              <div className="edu-degree">Bachelor of Computer Applications (BCA)</div>
-              <div className="edu-university">Sandip University, Nashik</div>
-              <p style={{fontSize:'12.5px',color:'var(--text-secondary)',marginBottom:'10px'}}>
-                Specialization in Data Analytics · CGPA: 7.01
-              </p>
-              <div className="edu-meta">
-                <span className="edu-year"><IconCalendar/> 2022 – 2025</span>
-                <span className="edu-location"><IconLocation/> Nashik, India</span>
-              </div>
-            </div>
+            ))}
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
-          <div style={{marginTop:'48px'}}>
-            <h3 style={{fontFamily:'var(--font-display)',fontSize:'1.2rem',marginBottom:'18px',color:'var(--text-primary)'}}>
-              Verified Professional Certifications
-            </h3>
-            <div className="education-grid" style={{marginTop:'0'}}>
-              {CERTIFICATIONS.map(cert => (
-                <a key={cert.title} href={cert.url} target="_blank" rel="noopener noreferrer" className="edu-card" style={{textDecoration:'none'}}>
-                  <div className="edu-icon">{cert.icon}</div>
-                  <div className="edu-degree" style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                    {cert.title}
-                    <IconExternal/>
+// ── Certifications Section ──────────────────────────────────
+function Certifications() {
+  const ref = useReveal();
+  const { certifications } = RESUME_DATA;
+
+  return (
+    <section id="certifications" className="section section-alt" aria-label="Certifications section">
+      <div className="container">
+        <div className="reveal" ref={ref}>
+          <div className="section-tag">Credentials</div>
+          <h2 className="section-title">Verified Professional Certifications</h2>
+          <p className="section-subtitle">
+            Industry and institutional certifications validating technical competencies in data analysis, generative AI, machine learning, and BI visualization.
+          </p>
+
+          <div className="certifications-grid">
+            {certifications.map(cert => (
+              <div key={cert.id} className="cert-card">
+                <div className="cert-header">
+                  <div className="cert-icon-wrapper">
+                    <span>{cert.icon}</span>
                   </div>
-                  <div className="edu-university">{cert.issuer}</div>
-                  <div className="edu-meta">
-                    <span className="edu-year" style={{color:'var(--accent)',fontWeight:600}}>✓ Verified Credential (Click to View)</span>
+                  <div className="cert-badges">
+                    <span className="cert-badge verified">
+                      ✓ {cert.isDirectDocument ? 'Verified Document' : 'Online Verification'}
+                    </span>
+                    {cert.isDirectDocument && (
+                      <span className="cert-badge direct-doc">Document File</span>
+                    )}
                   </div>
-                </a>
-              ))}
-            </div>
+                </div>
+
+                <h3 className="cert-title">{cert.title}</h3>
+                <div className="cert-issuer">{cert.issuer}</div>
+
+                <div className="cert-meta-list">
+                  {cert.completionDate && (
+                    <div className="cert-meta-item">
+                      <IconCalendar />
+                      <span><strong>Completion Date:</strong> {cert.completionDate}</span>
+                    </div>
+                  )}
+                  {cert.duration && (
+                    <div className="cert-meta-item">
+                      <span>⏱️ <strong>Duration:</strong> {cert.duration}</span>
+                    </div>
+                  )}
+                  {cert.credentialId && (
+                    <div className="cert-meta-item">
+                      <span>🏷️ <strong>Certificate ID:</strong> {cert.credentialId}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="cert-actions">
+                  <a
+                    href={cert.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="cert-view-btn"
+                    id={`view-${cert.id}`}
+                    title={cert.isDirectDocument ? 'View original certificate document in new tab' : 'Open official verification page in new tab'}
+                  >
+                    <span>{cert.isDirectDocument ? 'View Certificate Document' : 'Verify Online'}</span>
+                    <IconExternal />
+                  </a>
+
+                  {cert.credentialId && (
+                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                      ID: {cert.credentialId}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -1634,6 +1874,7 @@ export default function App() {
         <SportsAnalyticsLab />
         <Projects />
         <Education />
+        <Certifications />
         <CTABanner />
         <Contact />
       </main>

@@ -132,17 +132,23 @@ export async function downloadResumeDocx(): Promise<void> {
 
           // SECTION: Certifications
           createSectionHeading('VERIFIED CERTIFICATIONS'),
-          ...certifications.map(cert =>
-            new Paragraph({
+          ...certifications.map(cert => {
+            const metaParts: string[] = [];
+            if (cert.completionDate) metaParts.push(cert.completionDate);
+            if (cert.duration) metaParts.push(cert.duration);
+            if (cert.credentialId) metaParts.push(`ID: ${cert.credentialId}`);
+            const metaString = metaParts.length > 0 ? ` (${metaParts.join(' | ')})` : '';
+
+            return new Paragraph({
               bullet: { level: 0 },
               spacing: { after: 40 },
               children: [
                 new TextRun({ text: `${cert.title} `, bold: true, size: 19, color: '111827' }),
                 new TextRun({ text: `— ${cert.issuer}`, size: 19, color: '374151' }),
-                ...(cert.credentialId ? [new TextRun({ text: ` (Credential ID: ${cert.credentialId})`, size: 17, color: '6B7280' })] : []),
+                ...(metaString ? [new TextRun({ text: metaString, size: 17, color: '6B7280' })] : []),
               ],
-            })
-          ),
+            });
+          }),
         ],
       },
     ],
@@ -336,7 +342,7 @@ export function downloadResumePDF(): void {
 
   // Certifications
   addSection('Verified Certifications');
-  doc.setFontSize(8);
+  doc.setFontSize(7.8);
   certifications.forEach(cert => {
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(17, 24, 39);
@@ -345,9 +351,25 @@ export function downloadResumePDF(): void {
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(75, 85, 99);
     const titleW = doc.getTextWidth(`•  ${cert.title}`);
-    const cred = cert.credentialId ? ` (ID: ${cert.credentialId})` : '';
-    doc.text(` — ${cert.issuer}${cred}`, marginX + 2 + titleW, cursorY);
-    cursorY += 3.8;
+    const metaParts: string[] = [];
+    if (cert.completionDate) metaParts.push(cert.completionDate);
+    if (cert.credentialId) metaParts.push(`ID: ${cert.credentialId}`);
+    const metaStr = metaParts.length > 0 ? ` (${metaParts.join(', ')})` : '';
+
+    const textToPrint = ` — ${cert.issuer}${metaStr}`;
+    const splitText = doc.splitTextToSize(textToPrint, contentWidth - titleW - 4);
+    if (splitText.length === 1) {
+      doc.text(textToPrint, marginX + 2 + titleW, cursorY);
+      cursorY += 3.6;
+    } else {
+      doc.text(` — ${cert.issuer}`, marginX + 2 + titleW, cursorY);
+      cursorY += 3.4;
+      doc.setFontSize(7.2);
+      doc.setTextColor(107, 114, 128);
+      doc.text(metaStr, marginX + 6, cursorY);
+      cursorY += 3.4;
+      doc.setFontSize(7.8);
+    }
   });
 
   // Save ATS PDF file
